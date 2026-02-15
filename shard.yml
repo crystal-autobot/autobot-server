@@ -1,0 +1,13 @@
+name: autobot-server
+version: 0.1.0
+
+authors:
+  - Vitalii Elenhaupt <velenhaupt@gmail.com>
+
+crystal: ">= 1.14.0"
+
+license: MIT
+
+targets:
+  autobot-server:
+    main: src/main.cr

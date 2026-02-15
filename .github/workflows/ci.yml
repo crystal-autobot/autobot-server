@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: Test
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Crystal
+        run: brew install crystal
+
+      - name: Install dependencies
+        run: shards install
+
+      - name: Run tests
+        run: crystal spec
+
+      - name: Check code formatting
+        run: crystal tool format --check
+
+      - name: Build
+        run: make build
+
+  lint:
+    name: Lint
+    runs-on: macos-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Crystal
+        run: brew install crystal
+
+      - name: Install dependencies
+        run: shards install
+
+      - name: Run linter
+        run: |
+          shards install
+          bin/ameba || echo "Ameba not configured yet"

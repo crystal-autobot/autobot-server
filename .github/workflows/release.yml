@@ -1,0 +1,48 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build-linux-amd64:
+    name: Linux x86_64
+    runs-on: ubuntu-latest
+    container:
+      image: crystallang/crystal:latest-alpine
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: shards install
+      - name: Build static binary
+        run: |
+          crystal build src/main.cr -o autobot-server --release --no-debug --static
+          strip autobot-server
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: autobot-server-linux-amd64
+          path: autobot-server
+
+  build-linux-arm64:
+    name: Linux arm64
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      - name: Build in Docker (arm64)
+        run: |
+          docker run --rm --platform linux/arm64 \
+            -v $PWD:/src -w /src \
+            crystallang/crystal:latest-alpine \
+            sh -c "shards install && crystal build src/main.cr -o autobot-server --release --no-debug --static && strip autobot-server"
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: autobot-server-linux-arm64
+          path: autobot-server
